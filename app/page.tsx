@@ -26,8 +26,8 @@ export default function Home() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [showCredentials, setShowCredentials] = useState(false)
+  const [currentPage, setCurrentPage] = useState<Page>("login")
 
-  // Check for existing session on component mount
   useEffect(() => {
     const savedUser = localStorage.getItem("currentUser")
     if (savedUser) {
@@ -84,7 +84,6 @@ export default function Home() {
 
   const renderDashboard = () => {
     if (!user) return null
-
     switch (user.role) {
       case "admin":
         return <AdminDashboard user={user} onLogout={handleLogout} />
@@ -98,12 +97,10 @@ export default function Home() {
     }
   }
 
-  // If user is logged in, render the appropriate dashboard
-  if (user) {
-    return renderDashboard()
-  }
+  if (user) return renderDashboard()
+  if (currentPage === "register") return <RegisterPage />
+  if (currentPage === "forgot-password") return <ForgotPasswordPage />
 
-  // Render login form
   return (
     <AuthLayout>
       <div className="w-full max-w-md mx-auto">
@@ -115,68 +112,66 @@ export default function Home() {
             </div>
           </div>
 
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Username
-            </label>
-            <AuthInput
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter your username"
-              required
-              icon={<UserIcon size={20} />}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Password
-            </label>
-            <div className="relative">
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Username
+              </label>
               <AuthInput
-                id="password"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your username"
                 required
-                icon={<Lock size={20} />}
+                icon={<UserIcon size={20} />}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
             </div>
-          </div>
 
-          {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
-              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <AuthInput
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                  icon={<Lock size={20} />}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
             </div>
-          )}
 
-          <AuthButton type="submit" disabled={loading} className="w-full">
-            {loading ? (
-              <>
-                <LoadingSpinner size="sm" />
-                Signing in...
-              </>
-            ) : (
-              <>
-                <Zap size={20} />
-                Sign In
-              </>
+            {error && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+              </div>
             )}
-          </AuthButton>
-        </form>
 
-         <div className="grid grid-cols-2 gap-4 pt-4">
+            <AuthButton type="submit" disabled={loading} className="w-full">
+              {loading ? (
+                <>
+                  <LoadingSpinner size="sm" /> Signing in...
+                </>
+              ) : (
+                <>
+                  <Zap size={20} /> Sign In
+                </>
+              )}
+            </AuthButton>
+          </form>
+
+          <div className="grid grid-cols-2 gap-4 pt-4">
             <button
               type="button"
               onClick={() => setCurrentPage("register")}
@@ -192,10 +187,12 @@ export default function Home() {
               Forgot Password
             </button>
           </div>
-        </form>
 
-        <div className="mt-6 text-center">
-           <p className="text-xs text-gray-500 dark:text-gray-400">© 2025 JNE Cirebon Dashboard Shipment. All rights reserved.</p>
+          <div className="mt-6 text-center">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              © 2025 JNE Cirebon Dashboard Shipment. All rights reserved.
+            </p>
+          </div>
         </div>
       </div>
     </AuthLayout>
